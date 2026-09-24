@@ -166,6 +166,7 @@ def run_target(target_per_type, model=None, batch=10):
         for band, want in plan.items():
             have = counts.get((qtype, band), 0)
             need = want - have
+            stalls = 0                       # consecutive rounds that added nothing
             while need > 0:
                 n = min(batch, need)
                 print(f"[{_stamp()}] Generating {n} x {qtype} band {band} "
@@ -173,18 +174,28 @@ def run_target(target_per_type, model=None, batch=10):
                 t0 = time.time()
                 items = generate_batch(qtype, band, n, model=model)
                 dt = time.time() - t0
-                if not items:
-                    print(f"  none produced in {_fmt_dur(dt)}; "
-                          f"skipping rest of {qtype} band {band}")
-                    break
-                added, skipped, total = add_items(items, merge=True)
+                added, skipped, total = 0, 0, None
+                if items:
+                    added, skipped, total = add_items(items, merge=True)
+
+                if added == 0:
+                    stalls += 1
+                    print(f"  no new unique questions in {_fmt_dur(dt)} "
+                          f"(stall {stalls}/3)")
+                    if stalls >= 3:
+                        print(f"  giving up on {qtype} band {band} at "
+                              f"{have}/{want} (model out of unique items)")
+                        break
+                    continue
+
+                stalls = 0
                 elapsed = time.time() - start_all
                 print(f"  +{added} added, {skipped} dup skipped (bank={total}) "
                       f"in {_fmt_dur(dt)}  |  total {total_added + added} added, "
                       f"elapsed {_fmt_dur(elapsed)}")
                 total_added += added
                 have += added
-                need -= max(added, 1)  # avoid infinite loops if model stalls
+                need -= added        # count only what was actually added
     print(f"\n[{_stamp()}] Done. Added {total_added} questions in "
           f"{_fmt_dur(time.time() - start_all)}.")
 

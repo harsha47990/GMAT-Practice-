@@ -34,7 +34,9 @@ def validate_raw(items: list[dict]):
         opts = q.get("options", [])
         if len(opts) < 2:
             errors.append(f"{where}: needs >= 2 options")
-        if len(set(normalize_text(str(o)) for o in opts)) != len(opts):
+        # Compare raw text (case/space-insensitive) so symbols like -5 vs 5
+        # or 1/2 vs 12 are not falsely flagged as duplicates.
+        if len({str(o).strip().lower() for o in opts}) != len(opts):
             warnings.append(f"{where}: duplicate option text")
 
         ai = q.get("answer_index")
