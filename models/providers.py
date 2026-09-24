@@ -87,7 +87,7 @@ def _openai_completion(model_name, system, messages, max_tokens) -> LLMResponse:
         max_completion_tokens=max_tokens,
     )
     msg = response.choices[0].message
-    return LLMResponse(text=msg.content or "", raw_response=msg)
+    return LLMResponse(text=msg.content or "")
 
 
 def _anthropic_completion(model_name, system, messages, max_tokens) -> LLMResponse:
@@ -97,7 +97,7 @@ def _anthropic_completion(model_name, system, messages, max_tokens) -> LLMRespon
     ) as stream:
         response = stream.get_final_message()
     text = "\n".join(b.text for b in response.content if b.type == "text")
-    return LLMResponse(text=text, raw_response=response.content)
+    return LLMResponse(text=text)
 
 
 # ── JSON extraction helper (LLM outputs often wrap JSON in prose) ───────

@@ -143,7 +143,9 @@ def report(req: SidReq):
     markdown = generate_report(sess.results)
     return {"markdown": markdown}
 
-
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8100)
 # cd GMAT
 # python -m authoring.build_bank            # already done, re-run anytime
 # python -m authoring.generate_questions --target 100

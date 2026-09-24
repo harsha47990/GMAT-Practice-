@@ -122,6 +122,7 @@ function renderQuestion(payload) {
   nextBtn.disabled = true;
   nextBtn.textContent = payload.question_number >= sec.num_questions ? "Finish Section" : "Next";
   nextBtn.dataset.qid = q.id;
+  typeset(document.getElementById("screen-exam"));
 }
 
 async function submitAnswer() {
@@ -165,6 +166,7 @@ function renderReview(payload) {
     });
     list.appendChild(div);
   });
+  typeset(list);
 }
 
 async function editAnswer(qid, choice) {
@@ -220,6 +222,7 @@ async function loadQuickReport() {
     const res = await fetch(`/api/analytics?sid=${sid}`);
     const data = await res.json();
     el.innerHTML = mdToHtml(data.markdown || "No analysis.");
+    typeset(el);
   } catch (e) {
     el.innerHTML = "<span class='muted'>Could not load analysis.</span>";
   }
@@ -238,6 +241,7 @@ async function getReport() {
     const data = await res.json();
     document.getElementById("report-status").textContent = "";
     document.getElementById("report").innerHTML = mdToHtml(data.markdown || "No report.");
+    typeset(document.getElementById("report"));
   } catch (e) {
     document.getElementById("report-status").textContent = "Report generation failed.";
     btn.disabled = false;
@@ -293,6 +297,20 @@ function hideCalc() {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────
+function typeset(el) {
+  if (window.renderMathInElement && el) {
+    try {
+      renderMathInElement(el, {
+        delimiters: [
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false },
+        ],
+        throwOnError: false,
+      });
+    } catch (e) {}
+  }
+}
+
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

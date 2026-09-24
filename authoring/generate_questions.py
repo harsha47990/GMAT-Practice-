@@ -84,6 +84,7 @@ Requirements:
 - Each question must be original and clearly distinct from the list above and from each other.
 - Exactly one correct answer; 5 options unless the format requires otherwise.
 - Difficulty must genuinely match band {band} ({band_label}).
+- Write ALL math using inline LaTeX in \\( ... \\) delimiters, e.g. \\(x^2\\), \\(\\frac{{1}}{{2}}\\), \\(\\sqrt{{x+1}}\\). Keep money as plain text like $40 (never use $ for math).
 - Provide a concise 'explanation' of why the answer is correct.
 - Add 2-4 lowercase 'tags' describing the concept (e.g. "assumption", "work-rate").
 
