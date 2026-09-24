@@ -1,9 +1,6 @@
 # Secrets
 .env
 
-# Encrypted bank key — NEVER commit
-data/bank.key
-
 # Attempt data & generated reports
 data/attempts/
 reports/
