@@ -25,11 +25,20 @@ _load_local_env_file()
 # ── Credentials ─────────────────────────────────────────────────────────
 FOUNDRY_API_KEY = os.environ.get("FOUNDRY_API_KEY", "")
 FOUNDRY_BASE = os.environ.get("FOUNDRY_BASE", "")
+GMAT_AI_ANALYSIS = os.environ.get("GMAT_AI_ANALYSIS", "false").strip().lower() in {
+    "1", "true", "yes", "on",
+}
 
-if not FOUNDRY_API_KEY:
-    raise RuntimeError("FOUNDRY_API_KEY is not set. Add it to GMAT/.env")
-if not FOUNDRY_BASE:
-    raise RuntimeError("FOUNDRY_BASE is not set. Add it to GMAT/.env")
+
+def foundry_configured() -> bool:
+    """Return whether real Foundry endpoint credentials are present."""
+    placeholders = {"your-api-key", "your-foundry-endpoint.services.ai.azure.com"}
+    return bool(
+        FOUNDRY_API_KEY
+        and FOUNDRY_BASE
+        and FOUNDRY_API_KEY.strip().lower() not in placeholders
+        and FOUNDRY_BASE.strip().lower().removeprefix("https://") not in placeholders - {"your-api-key"}
+    )
 
 # ── Available models (name -> max output tokens) ───────────────────────
 OPENAI_MODELS = {

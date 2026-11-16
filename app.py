@@ -15,6 +15,7 @@ from config import SECTIONS, TYPE_LABELS
 from engine.bank import load_bank, filter_questions
 from engine.session import Session
 from analysis.report_card import generate_report, quick_report
+from models.global_config import GMAT_AI_ANALYSIS, foundry_configured
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
@@ -135,12 +136,28 @@ def analytics(sid: str):
     return {"markdown": quick_report(sess.results)}
 
 
+@app.get("/api/features")
+def features():
+    """Expose optional app features without requiring an LLM connection."""
+    return {
+        "ai_analysis_enabled": GMAT_AI_ANALYSIS and foundry_configured(),
+        "ai_analysis_configured": foundry_configured(),
+    }
+
+
 @app.post("/api/report")
 def report(req: SidReq):
+    if not GMAT_AI_ANALYSIS:
+        raise HTTPException(503, "AI analysis is disabled. Set GMAT_AI_ANALYSIS=true to enable it.")
+    if not foundry_configured():
+        raise HTTPException(503, "AI analysis needs a valid FOUNDRY_BASE and FOUNDRY_API_KEY.")
     sess = _get(req.sid)
     if not sess.finished or not sess.results:
         raise HTTPException(400, "Attempt is not finished yet.")
-    markdown = generate_report(sess.results)
+    try:
+        markdown = generate_report(sess.results)
+    except Exception as exc:
+        raise HTTPException(502, "Foundry report request failed. Check the endpoint, key, and model deployment.") from exc
     return {"markdown": markdown}
 
 if __name__ == "__main__":

@@ -13,6 +13,7 @@ import requests as http_requests
 from .global_config import (
     FOUNDRY_API_KEY,
     FOUNDRY_BASE,
+    foundry_configured,
     OPENAI_MODELS,
     ANTHROPIC_MODELS,
     get_model_max_tokens,
@@ -47,11 +48,15 @@ def _is_anthropic(model_name: str) -> bool:
 
 
 def _get_openai_client():
+    if not foundry_configured():
+        raise RuntimeError("Foundry is not configured. Set FOUNDRY_BASE and FOUNDRY_API_KEY.")
     from openai import OpenAI
     return OpenAI(base_url=f"{FOUNDRY_BASE}/openai/v1", api_key=FOUNDRY_API_KEY)
 
 
 def _get_anthropic_client():
+    if not foundry_configured():
+        raise RuntimeError("Foundry is not configured. Set FOUNDRY_BASE and FOUNDRY_API_KEY.")
     import anthropic
     return anthropic.Anthropic(base_url=f"{FOUNDRY_BASE}/anthropic/", api_key=FOUNDRY_API_KEY)
 

@@ -12,7 +12,7 @@ timers, an on-screen calculator, scoring, and an AI report card.
 - **On-screen calculator**: available in Data Insights (mirrors the real exam).
 - **Review & edit**: change up to 3 answers per section before confirming.
 - **Encrypted question bank**: `data/bank.dat` is gzipped + Fernet-encrypted, so questions/answers are not human-readable on disk.
-- **AI report card**: per-topic, per-difficulty, per-tag accuracy, pacing analysis, and a prioritized study plan.
+- **Optional AI report card**: disabled by default; quick offline analytics always work.
 
 ---
 
@@ -22,8 +22,11 @@ cd GMAT
 python -m venv .venv; .\.venv\Scripts\Activate.ps1   # optional but recommended
 pip install -r requirements.txt
 ```
-`.env` already contains the Foundry credentials and the model (`GMAT_MODEL=gpt-5.6-sol`)
-used for AI generation and the report card. Edit it if your endpoint/key changes.
+Set `FOUNDRY_BASE`, `FOUNDRY_API_KEY`, and `GMAT_MODEL` in `.env` to use Foundry-backed
+question generation. AI report cards are independently controlled by
+`GMAT_AI_ANALYSIS=false` (the default). Set it to `true` to enable AI report cards;
+this also requires valid Foundry credentials. The exam and quick offline analytics work
+without Foundry.
 
 ---
 

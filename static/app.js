@@ -10,6 +10,7 @@ let calcVisible = false;
 // ── Boot ──────────────────────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", async () => {
   Calculator.render();
+  configureAiReport();
   try {
     const res = await fetch("/api/topics");
     const data = await res.json();
@@ -27,6 +28,27 @@ window.addEventListener("DOMContentLoaded", async () => {
     showError("Could not reach the server.");
   }
 });
+
+async function configureAiReport() {
+  const btn = document.getElementById("report-btn");
+  const help = document.getElementById("ai-report-help");
+  try {
+    const res = await fetch("/api/features");
+    if (!res.ok) throw new Error("Could not check AI settings.");
+    const features = await res.json();
+    btn.disabled = !features.ai_analysis_enabled;
+    if (features.ai_analysis_enabled) {
+      help.textContent = "Optional: generate a coach-style report using AI.";
+    } else if (!features.ai_analysis_configured) {
+      help.textContent = "AI report is off. Configure Foundry credentials and set GMAT_AI_ANALYSIS=true to enable it.";
+    } else {
+      help.textContent = "AI report is off. Set GMAT_AI_ANALYSIS=true in .env to enable it.";
+    }
+  } catch (e) {
+    btn.disabled = true;
+    help.textContent = "AI report availability could not be checked.";
+  }
+}
 
 function showError(msg) {
   document.getElementById("home-error").textContent = msg;
@@ -239,11 +261,12 @@ async function getReport() {
       body: JSON.stringify({ sid }),
     });
     const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Report generation failed.");
     document.getElementById("report-status").textContent = "";
     document.getElementById("report").innerHTML = mdToHtml(data.markdown || "No report.");
     typeset(document.getElementById("report"));
   } catch (e) {
-    document.getElementById("report-status").textContent = "Report generation failed.";
+    document.getElementById("report-status").textContent = e.message || "Report generation failed.";
     btn.disabled = false;
   }
 }
